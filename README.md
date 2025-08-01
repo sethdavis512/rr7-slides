@@ -5,10 +5,10 @@ A modern, professional slideshow application built with React Router 7, TypeScri
 ## ✨ Features
 
 - 📊 **Professional Slide Designs** - PowerPoint-inspired layouts with modern styling
-- 🎬 **Smooth Transitions** - Beautiful fade animations between slides
+- 🎬 **Smooth Transitions** - Loading states and component transitions
 - 📝 **MDX Support** - Write slides in Markdown with React components
 - 🔄 **Dynamic Discovery** - Automatic slide detection and ordering
-- ⌨️ **Keyboard Navigation** - Arrow keys and spacebar controls
+- ⌨️ **Keyboard Navigation** - Left/Right arrow key controls
 - 📱 **Responsive Design** - Optimized for different screen sizes
 - 🚀 **Performance** - Lazy loading and component caching
 - 🎨 **TailwindCSS** - Atomic CSS for consistent styling
@@ -48,36 +48,33 @@ npm run dev
 
 ### Viewing Slides
 
-The application provides multiple ways to view your slideshow:
+The application provides two main routes:
 
-- **`/`** - Home page with navigation options
-- **`/slides`** - Slide list/overview page
-- **`/slides/{slide-id}`** - Full-screen presentation mode
+- **`/`** - Home page with navigation to start slideshow
+- **`/slides/{slide-id}`** - Full-screen presentation mode (e.g., `/slides/01-intro`)
 
 ### Navigation Controls
 
 In presentation mode (`/slides/{slide-id}`):
 
-- **Arrow Keys** - Navigate between slides
-- **Spacebar** - Go to next slide
-- **Escape** - Exit presentation mode
-- **Home/End** - Jump to first/last slide
+- **Left/Right Arrow Keys** - Navigate between slides
+- **Navigation buttons** - Click previous/next buttons on screen
+- **Slide indicators** - Click dots at bottom to jump to specific slides
 
 ### Creating New Slides
 
 1. Create a new `.mdx` file in `app/routes/slides/`
-1. Use numeric prefixes for ordering: `07-new-slide.mdx`
-1. Add frontmatter and content:
+2. Use numeric prefixes for ordering: `07-new-slide.mdx`
+3. Write your slide content using MDX:
 
 ```mdx
----
-title: 'Your Slide Title'
-description: 'Slide description'
----
-
-# Your Slide Content
+# Your Slide Title
 
 Write your slide content using Markdown and React components.
+
+<div className="text-center">
+  Custom React components work here!
+</div>
 ```
 
 1. The slide will be automatically discovered and added to the presentation
@@ -100,13 +97,12 @@ Slides are organized with the following naming convention:
 ```text
 app/
 ├── routes/
-│   ├── slides/           # MDX slide files
+│   ├── slides/           # MDX slide files (01-intro.mdx, 02-alfa.mdx, etc.)
 │   ├── home.tsx          # Landing page
-│   ├── list.tsx          # Slide overview
 │   └── stage.tsx         # Presentation component
 ├── utils/
 │   ├── slide-discovery.ts # Auto-discovery logic
-│   └── common.ts         # Shared utilities
+│   └── common.ts         # Shared utilities (currently minimal)
 ├── types/                # TypeScript definitions
 ├── images/               # Static assets
 ├── app.css              # Global styles
