@@ -1,15 +1,62 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-sans:
+        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+    @apply bg-white dark:bg-gray-950;
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+    @media (prefers-color-scheme: dark) {
+        color-scheme: dark;
+    }
+}
+
+/* Keep only styles that can't be easily replicated with Tailwind */
+
+/* Slide transitions */
+@media (prefers-reduced-motion: no-preference) {
+    .slide-container {
+        view-transition-name: slide;
+    }
+    
+    /* Add smooth page transitions if supported */
+    ::view-transition-old(slide),
+    ::view-transition-new(slide) {
+        animation-duration: 0.3s;
+        animation-timing-function: ease-in-out;
+    }
+    
+    ::view-transition-old(slide) {
+        animation-name: slide-out;
+    }
+    
+    ::view-transition-new(slide) {
+        animation-name: slide-in;
+    }
+}
+
+@keyframes slide-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+}
+
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }

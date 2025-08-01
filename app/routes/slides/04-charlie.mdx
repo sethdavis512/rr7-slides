@@ -1,0 +1,50 @@
+---
+title: Full Screen Photo
+---
+
+<div className="h-full flex items-stretch">
+  {/* Left Column - Title and Content */}
+  <div className="flex-1 flex items-center justify-center p-8">
+    <div className="w-full h-full max-w-lg max-h-96 bg-gray-700 rounded-2xl shadow-2xl overflow-hidden border-4 border-gray-600">
+      {/* Placeholder for image - replace with actual image */}
+      <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="w-16 h-16 mx-auto mb-4 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <p className="text-sm opacity-75">Replace with your image</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Right Column - Photo */}
+  <div className="flex-1 flex flex-col justify-center px-16 py-12">
+    <div>
+      <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
+        Slide Title
+      </h1>
+      <h2 className="text-2xl md:text-3xl text-gray-300 font-light mb-12">
+        Slide Subtitle
+      </h2>
+      
+      <div className="space-y-6 text-xl text-gray-100">
+        <div className="flex items-start">
+          <div className="w-2 h-2 bg-blue-500 rounded-full mt-3 mr-6 flex-shrink-0"></div>
+          <p>Slide bullet text with meaningful content that supports your presentation</p>
+        </div>
+        <div className="flex items-start">
+          <div className="w-2 h-2 bg-blue-500 rounded-full mt-3 mr-6 flex-shrink-0"></div>
+          <p>Another important point to discuss with your audience</p>
+        </div>
+        <div className="flex items-start">
+          <div className="w-2 h-2 bg-blue-500 rounded-full mt-3 mr-6 flex-shrink-0"></div>
+          <p>Key takeaway or call to action for this slide</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>

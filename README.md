@@ -1,87 +1,262 @@
-# Welcome to React Router!
+# TWS Slides
 
-A modern, production-ready template for building full-stack React applications using React Router.
+A modern, professional slideshow application built with React Router 7, TypeScript, and MDX. Features dynamic slide discovery, smooth transitions, and PowerPoint-inspired designs.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## ✨ Features
 
-## Features
+-   📊 **Professional Slide Designs** - PowerPoint-inspired layouts with modern styling
+-   🎬 **Smooth Transitions** - Beautiful fade animations between slides
+-   📝 **MDX Support** - Write slides in Markdown with React components
+-   🔄 **Dynamic Discovery** - Automatic slide detection and ordering
+-   ⌨️ **Keyboard Navigation** - Arrow keys and spacebar controls
+-   📱 **Responsive Design** - Optimized for different screen sizes
+-   🚀 **Performance** - Lazy loading and component caching
+-   🎨 **TailwindCSS** - Atomic CSS for consistent styling
+-   🔒 **TypeScript** - Full type safety throughout
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## 🚀 Quick Start
 
-## Getting Started
+### Prerequisites
+
+-   Node.js 18+
+-   npm or yarn
 
 ### Installation
 
-Install the dependencies:
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd rr7-slides
+```
+
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-### Development
-
-Start the development server with HMR:
+1. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+1. Open your browser to `http://localhost:5173`
 
-## Building for Production
+## 📖 Usage
 
-Create a production build:
+### Viewing Slides
+
+The application provides multiple ways to view your slideshow:
+
+-   **`/`** - Home page with navigation options
+-   **`/slides`** - Slide list/overview page
+-   **`/slides/{slide-id}`** - Full-screen presentation mode
+
+### Navigation Controls
+
+In presentation mode (`/slides/{slide-id}`):
+
+-   **Arrow Keys** - Navigate between slides
+-   **Spacebar** - Go to next slide
+-   **Escape** - Exit presentation mode
+-   **Home/End** - Jump to first/last slide
+
+### Creating New Slides
+
+1. Create a new `.mdx` file in `app/routes/slides/`
+1. Use numeric prefixes for ordering: `07-new-slide.mdx`
+1. Add frontmatter and content:
+
+```mdx
+---
+title: 'Your Slide Title'
+description: 'Slide description'
+---
+
+# Your Slide Content
+
+Write your slide content using Markdown and React components.
+```
+
+1. The slide will be automatically discovered and added to the presentation
+
+### Slide Structure
+
+Slides are organized with the following naming convention:
+
+-   `01-intro.mdx` - Introduction slide
+-   `02-alfa.mdx` - First content slide
+-   `03-beta.mdx` - Second content slide
+-   `04-charlie.mdx` - Third content slide
+-   `05-delta.mdx` - Fourth content slide
+-   `06-end.mdx` - Closing slide
+
+## 🏗️ Architecture
+
+### Project Structure
+
+```text
+app/
+├── routes/
+│   ├── slides/           # MDX slide files
+│   ├── home.tsx          # Landing page
+│   ├── list.tsx          # Slide overview
+│   └── stage.tsx         # Presentation component
+├── utils/
+│   ├── slide-discovery.ts # Auto-discovery logic
+│   └── common.ts         # Shared utilities
+├── types/                # TypeScript definitions
+├── images/               # Static assets
+├── app.css              # Global styles
+├── root.tsx             # App root component
+└── routes.ts            # Route configuration
+```
+
+### Key Technologies
+
+-   **React Router 7** - File-based routing and SSR
+-   **MDX** - Markdown with React components
+-   **TailwindCSS** - Utility-first CSS framework
+
+-   **TypeScript** - Type safety and developer experience
+-   **Vite** - Fast build tool and dev server
+
+### Slide Discovery System
+
+The application uses Vite's `import.meta.glob` to automatically discover slides:
+
+-   Scans `app/routes/slides/*.mdx` files
+-   Extracts ordering from filename prefixes (`01-`, `02-`, etc.)
+-   Lazy loads slide components for performance
+-   Caches metadata to avoid repeated discovery
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Type checking
+npm run typecheck
+```
+
+### Customizing Slide Designs
+
+Slides use TailwindCSS classes for styling. Key design patterns:
+
+-   **Full-screen layouts** - `w-screen h-screen`
+-   **Responsive padding** - `px-32 py-16 pb-32 xl:px-24 md:px-16`
+-   **Professional typography** - `text-7xl to text-9xl` for titles
+-   **Color schemes** - Blue accents with high contrast
+-   **Geometric elements** - Decorative shapes for visual interest
+
+### Adding Custom Components
+
+You can create reusable components for slides:
+
+```tsx
+// app/components/CodeBlock.tsx
+export function CodeBlock({
+    children,
+    language
+}: {
+    children: string;
+    language: string;
+}) {
+    return (
+        <pre className="bg-gray-900 text-green-400 p-4 rounded-lg">
+            <code className={`language-${language}`}>{children}</code>
+        </pre>
+    );
+}
+```
+
+Then use in MDX:
+
+```mdx
+import { CodeBlock } from '../components/CodeBlock';
+
+# My Slide
+
+<CodeBlock language="javascript">console.log('Hello, World!');</CodeBlock>
+```
+
+## 🚀 Production Deployment
+
+### Build Process
 
 ```bash
 npm run build
 ```
 
-## Deployment
+This creates:
 
-### Docker Deployment
+-   `build/client/` - Static assets for the browser
+-   `build/server/` - Server-side code for SSR
 
-To build and run using Docker:
+### Deployment Options
+
+**Node.js Server:**
 
 ```bash
-docker build -t my-app .
+npm start
+```
 
-# Run the container
-docker run -p 3000:3000 my-app
+**Static Hosting:**
+The app supports static export for platforms like Netlify, Vercel, or GitHub Pages.
+
+**Docker:**
+Create a Dockerfile for containerized deployment:
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+**Build and run with Docker:**
+
+```bash
+docker build -t rr7-slides .
+docker run -p 3000:3000 rr7-slides
 ```
 
 The containerized application can be deployed to any platform that supports Docker, including:
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+-   AWS ECS
+-   Google Cloud Run
+-   Azure Container Apps
+-   Digital Ocean App Platform
+-   Fly.io
+-   Railway
 
-### DIY Deployment
+## 📝 License
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+This project is open source and available under the [MIT License](LICENSE).
 
-Make sure to deploy the output of `npm run build`
+## 🤝 Contributing
 
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Styling
+## 📞 Support
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+If you have any questions or need help with the slideshow application, please open an issue on GitHub.
 
 ---
 
-Built with ❤️ using React Router.
+Built with ❤️ using React Router 7, TypeScript, and MDX.
