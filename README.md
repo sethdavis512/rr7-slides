@@ -1,25 +1,25 @@
-# TWS Slides
+# RR7 Slides
 
 A modern, professional slideshow application built with React Router 7, TypeScript, and MDX. Features dynamic slide discovery, smooth transitions, and PowerPoint-inspired designs.
 
 ## ✨ Features
 
--   📊 **Professional Slide Designs** - PowerPoint-inspired layouts with modern styling
--   🎬 **Smooth Transitions** - Beautiful fade animations between slides
--   📝 **MDX Support** - Write slides in Markdown with React components
--   🔄 **Dynamic Discovery** - Automatic slide detection and ordering
--   ⌨️ **Keyboard Navigation** - Arrow keys and spacebar controls
--   📱 **Responsive Design** - Optimized for different screen sizes
--   🚀 **Performance** - Lazy loading and component caching
--   🎨 **TailwindCSS** - Atomic CSS for consistent styling
--   🔒 **TypeScript** - Full type safety throughout
+- 📊 **Professional Slide Designs** - PowerPoint-inspired layouts with modern styling
+- 🎬 **Smooth Transitions** - Beautiful fade animations between slides
+- 📝 **MDX Support** - Write slides in Markdown with React components
+- 🔄 **Dynamic Discovery** - Automatic slide detection and ordering
+- ⌨️ **Keyboard Navigation** - Arrow keys and spacebar controls
+- 📱 **Responsive Design** - Optimized for different screen sizes
+- 🚀 **Performance** - Lazy loading and component caching
+- 🎨 **TailwindCSS** - Atomic CSS for consistent styling
+- 🔒 **TypeScript** - Full type safety throughout
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
--   Node.js 18+
--   npm or yarn
+- Node.js 18+
+- npm or yarn
 
 ### Installation
 
@@ -50,18 +50,18 @@ npm run dev
 
 The application provides multiple ways to view your slideshow:
 
--   **`/`** - Home page with navigation options
--   **`/slides`** - Slide list/overview page
--   **`/slides/{slide-id}`** - Full-screen presentation mode
+- **`/`** - Home page with navigation options
+- **`/slides`** - Slide list/overview page
+- **`/slides/{slide-id}`** - Full-screen presentation mode
 
 ### Navigation Controls
 
 In presentation mode (`/slides/{slide-id}`):
 
--   **Arrow Keys** - Navigate between slides
--   **Spacebar** - Go to next slide
--   **Escape** - Exit presentation mode
--   **Home/End** - Jump to first/last slide
+- **Arrow Keys** - Navigate between slides
+- **Spacebar** - Go to next slide
+- **Escape** - Exit presentation mode
+- **Home/End** - Jump to first/last slide
 
 ### Creating New Slides
 
@@ -86,12 +86,12 @@ Write your slide content using Markdown and React components.
 
 Slides are organized with the following naming convention:
 
--   `01-intro.mdx` - Introduction slide
--   `02-alfa.mdx` - First content slide
--   `03-beta.mdx` - Second content slide
--   `04-charlie.mdx` - Third content slide
--   `05-delta.mdx` - Fourth content slide
--   `06-end.mdx` - Closing slide
+- `01-intro.mdx` - Introduction slide
+- `02-alfa.mdx` - First content slide
+- `03-beta.mdx` - Second content slide
+- `04-charlie.mdx` - Third content slide
+- `05-delta.mdx` - Fourth content slide
+- `06-end.mdx` - Closing slide
 
 ## 🏗️ Architecture
 
@@ -116,21 +116,21 @@ app/
 
 ### Key Technologies
 
--   **React Router 7** - File-based routing and SSR
--   **MDX** - Markdown with React components
--   **TailwindCSS** - Utility-first CSS framework
+- **React Router 7** - File-based routing and SSR
+- **MDX** - Markdown with React components
+- **TailwindCSS** - Utility-first CSS framework
 
--   **TypeScript** - Type safety and developer experience
--   **Vite** - Fast build tool and dev server
+- **TypeScript** - Type safety and developer experience
+- **Vite** - Fast build tool and dev server
 
 ### Slide Discovery System
 
 The application uses Vite's `import.meta.glob` to automatically discover slides:
 
--   Scans `app/routes/slides/*.mdx` files
--   Extracts ordering from filename prefixes (`01-`, `02-`, etc.)
--   Lazy loads slide components for performance
--   Caches metadata to avoid repeated discovery
+- Scans `app/routes/slides/*.mdx` files
+- Extracts ordering from filename prefixes (`01-`, `02-`, etc.)
+- Lazy loads slide components for performance
+- Caches metadata to avoid repeated discovery
 
 ## 🛠️ Development
 
@@ -154,11 +154,11 @@ npm run typecheck
 
 Slides use TailwindCSS classes for styling. Key design patterns:
 
--   **Full-screen layouts** - `w-screen h-screen`
--   **Responsive padding** - `px-32 py-16 pb-32 xl:px-24 md:px-16`
--   **Professional typography** - `text-7xl to text-9xl` for titles
--   **Color schemes** - Blue accents with high contrast
--   **Geometric elements** - Decorative shapes for visual interest
+- **Full-screen layouts** - `w-screen h-screen`
+- **Responsive padding** - `px-32 py-16 pb-32 xl:px-24 md:px-16`
+- **Professional typography** - `text-7xl to text-9xl` for titles
+- **Color schemes** - Blue accents with high contrast
+- **Geometric elements** - Decorative shapes for visual interest
 
 ### Adding Custom Components
 
@@ -201,8 +201,8 @@ npm run build
 
 This creates:
 
--   `build/client/` - Static assets for the browser
--   `build/server/` - Server-side code for SSR
+- `build/client/` - Static assets for the browser
+- `build/server/` - Server-side code for SSR
 
 ### Deployment Options
 
@@ -238,12 +238,12 @@ docker run -p 3000:3000 rr7-slides
 
 The containerized application can be deployed to any platform that supports Docker, including:
 
--   AWS ECS
--   Google Cloud Run
--   Azure Container Apps
--   Digital Ocean App Platform
--   Fly.io
--   Railway
+- AWS ECS
+- Google Cloud Run
+- Azure Container Apps
+- Digital Ocean App Platform
+- Fly.io
+- Railway
 
 ## 📝 License
 
