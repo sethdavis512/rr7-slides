@@ -66,25 +66,28 @@ export async function importSlide(slideId: string) {
     return module.default;
 }
 
-// Get next/previous slide IDs
-export async function getNextSlideId(currentSlideId: string): Promise<string | null> {
+// Get navigation slide IDs
+export async function getNavigationSlideIds(currentSlideId: string): Promise<{ next: string | null; previous: string | null }> {
     const slides = await getSlides();
     const currentIndex = slides.findIndex(s => s.id === currentSlideId);
     
-    if (currentIndex === -1 || currentIndex === slides.length - 1) {
-        return null;
+    if (currentIndex === -1) {
+        return { next: null, previous: null };
     }
     
-    return slides[currentIndex + 1].id;
+    return {
+        next: currentIndex < slides.length - 1 ? slides[currentIndex + 1].id : null,
+        previous: currentIndex > 0 ? slides[currentIndex - 1].id : null
+    };
+}
+
+// Legacy functions for backward compatibility
+export async function getNextSlideId(currentSlideId: string): Promise<string | null> {
+    const { next } = await getNavigationSlideIds(currentSlideId);
+    return next;
 }
 
 export async function getPreviousSlideId(currentSlideId: string): Promise<string | null> {
-    const slides = await getSlides();
-    const currentIndex = slides.findIndex(s => s.id === currentSlideId);
-    
-    if (currentIndex <= 0) {
-        return null;
-    }
-    
-    return slides[currentIndex - 1].id;
+    const { previous } = await getNavigationSlideIds(currentSlideId);
+    return previous;
 }

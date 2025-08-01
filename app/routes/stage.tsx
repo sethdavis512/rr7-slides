@@ -30,8 +30,7 @@ export default function StageRoute() {
                     setSlideComponent(() => component);
                     setLoading(false);
                 })
-                .catch(error => {
-                    console.error('Failed to load slide:', error);
+                .catch(() => {
                     setLoading(false);
                 });
         } else if (slides.length > 0) {
@@ -40,18 +39,16 @@ export default function StageRoute() {
         }
     }, [slideId, slides, navigate]);
 
-    const goToNextSlide = async () => {
-        const nextSlideId = await getNextSlideId(slideId);
-        if (nextSlideId) {
-            navigate(`/slides/${nextSlideId}`);
-        }
+    const goToNextSlide = () => {
+        getNextSlideId(slideId).then(nextSlideId => {
+            if (nextSlideId) navigate(`/slides/${nextSlideId}`);
+        });
     };
 
-    const goToPrevSlide = async () => {
-        const prevSlideId = await getPreviousSlideId(slideId);
-        if (prevSlideId) {
-            navigate(`/slides/${prevSlideId}`);
-        }
+    const goToPrevSlide = () => {
+        getPreviousSlideId(slideId).then(prevSlideId => {
+            if (prevSlideId) navigate(`/slides/${prevSlideId}`);
+        });
     };
 
     // Handle keyboard navigation
@@ -66,7 +63,7 @@ export default function StageRoute() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [currentSlideIndex]);
+    }, [slideId]);
 
     if (loading || !SlideComponent) {
         return (
