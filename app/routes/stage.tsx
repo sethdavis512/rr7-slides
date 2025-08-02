@@ -4,8 +4,7 @@ import {
     getSlides,
     importSlide,
     getNextSlideId,
-    getPreviousSlideId,
-    type SlideMetadata
+    getPreviousSlideId
 } from '../utils/slide-discovery';
 import type { Route } from './+types/stage';
 
