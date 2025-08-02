@@ -1,54 +1,92 @@
-import { useParams, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useEffect, useState, Suspense } from 'react';
-import { getSlides, importSlide, getNextSlideId, getPreviousSlideId, type SlideMetadata } from '../utils/slide-discovery';
+import {
+    getSlides,
+    importSlide,
+    getNextSlideId,
+    getPreviousSlideId,
+    type SlideMetadata
+} from '../utils/slide-discovery';
+import type { Route } from './+types/stage';
 
-export default function StageRoute() {
-    const { slideId = '' } = useParams<{ slideId?: string }>();
+// Loader function to fetch data following React Router 7 conventions
+export async function loader({ params }: Route.LoaderArgs) {
+    const { slideId = '' } = params;
+
+    try {
+        // Load all slides
+        const slides = await getSlides();
+
+        // Find current slide index
+        const currentSlideIndex = slides.findIndex((s) => s.id === slideId);
+
+        // If slideId doesn't exist, redirect to first slide
+        if (currentSlideIndex === -1 && slides.length > 0) {
+            throw new Response('', {
+                status: 302,
+                headers: {
+                    Location: `/slides/${slides[0].id}`
+                }
+            });
+        }
+
+        return {
+            slides,
+            currentSlideIndex: Math.max(0, currentSlideIndex),
+            slideId
+        };
+    } catch (error) {
+        // If slide not found, get all slides and redirect to first
+        const slides = await getSlides();
+        if (slides.length > 0) {
+            throw new Response('', {
+                status: 302,
+                headers: {
+                    Location: `/slides/${slides[0].id}`
+                }
+            });
+        }
+        throw error;
+    }
+}
+
+export default function StageRoute({ loaderData }: Route.ComponentProps) {
     const navigate = useNavigate();
-    const [slides, setSlides] = useState<SlideMetadata[]>([]);
-    const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-    const [SlideComponent, setSlideComponent] = useState<React.ComponentType | null>(null);
+    const { slides, currentSlideIndex, slideId } = loaderData;
+    const [SlideComponent, setSlideComponent] =
+        useState<React.ComponentType | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Load all slides on mount
+    // Load the slide component when slideId changes
     useEffect(() => {
-        getSlides().then(setSlides);
-    }, []);
-
-    // Find current slide index and load component when slideId or slides change
-    useEffect(() => {
-        if (slides.length === 0) return;
-        
-        const index = slides.findIndex((s) => s.id === slideId);
-        if (index !== -1) {
-            setCurrentSlideIndex(index);
-            setLoading(true);
-            
-            // Dynamically import the slide component
-            importSlide(slideId)
-                .then(component => {
-                    setSlideComponent(() => component);
-                    setLoading(false);
-                })
-                .catch(() => {
-                    setLoading(false);
-                });
-        } else if (slides.length > 0) {
-            // If slideId doesn't exist, redirect to first slide
-            navigate(`/slides/${slides[0].id}`, { replace: true });
+        if (!slideId) {
+            setLoading(false);
+            return;
         }
-    }, [slideId, slides, navigate]);
 
-    const goToNextSlide = () => {
-        getNextSlideId(slideId).then(nextSlideId => {
-            if (nextSlideId) navigate(`/slides/${nextSlideId}`);
-        });
+        const loadSlideComponent = async () => {
+            setLoading(true);
+            try {
+                const component = await importSlide(slideId);
+                setSlideComponent(() => component);
+                setLoading(false);
+            } catch {
+                setSlideComponent(null);
+                setLoading(false);
+            }
+        };
+
+        loadSlideComponent();
+    }, [slideId]);
+
+    const goToNextSlide = async () => {
+        const nextSlideId = await getNextSlideId(slideId);
+        if (nextSlideId) navigate(`/slides/${nextSlideId}`);
     };
 
-    const goToPrevSlide = () => {
-        getPreviousSlideId(slideId).then(prevSlideId => {
-            if (prevSlideId) navigate(`/slides/${prevSlideId}`);
-        });
+    const goToPrevSlide = async () => {
+        const prevSlideId = await getPreviousSlideId(slideId);
+        if (prevSlideId) navigate(`/slides/${prevSlideId}`);
     };
 
     // Handle keyboard navigation
@@ -72,7 +110,9 @@ export default function StageRoute() {
                     {loading ? (
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
                     ) : null}
-                    <h1 className="text-2xl">{loading ? 'Loading slide...' : 'Slide not found'}</h1>
+                    <h1 className="text-2xl">
+                        {loading ? 'Loading slide...' : 'Slide not found'}
+                    </h1>
                 </div>
             </div>
         );
@@ -82,11 +122,13 @@ export default function StageRoute() {
         <div className="w-screen h-screen relative bg-gray-900 text-white overflow-hidden">
             <div className="px-32 py-16 pb-32 xl:px-24 md:px-16 h-full flex items-center justify-center">
                 <div className="max-w-4xl w-full">
-                    <Suspense fallback={
-                        <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        </div>
-                    }>
+                    <Suspense
+                        fallback={
+                            <div className="flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            </div>
+                        }
+                    >
                         <SlideComponent />
                     </Suspense>
                 </div>
