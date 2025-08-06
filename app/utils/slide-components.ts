@@ -10,15 +10,15 @@ import End from '../routes/slides/06-end.mdx';
 
 // Static component mapping - no dynamic imports needed
 export const SLIDE_COMPONENTS: Record<string, React.ComponentType> = {
-  intro: Intro,
-  alfa: Alfa,
-  beta: Beta,
-  charlie: Charlie,
-  delta: Delta,
-  end: End,
+    intro: Intro,
+    alfa: Alfa,
+    beta: Beta,
+    charlie: Charlie,
+    delta: Delta,
+    end: End
 } as const;
 
 // Get slide component by ID
 export function getSlideComponent(slideId: string): React.ComponentType | null {
-  return SLIDE_COMPONENTS[slideId] || null;
+    return SLIDE_COMPONENTS[slideId] || null;
 }
