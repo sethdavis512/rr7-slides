@@ -20,7 +20,7 @@ export default function Home() {
                     Click below to begin your slides.
                 </p>
                 <a
-                    href="/slides/01-intro"
+                    href="/slides/intro"
                     className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 text-lg shadow-lg hover:shadow-xl hover:scale-105"
                 >
                     Go to First Slide

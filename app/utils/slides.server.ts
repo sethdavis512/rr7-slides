@@ -1,5 +1,7 @@
-// Server-only slide configuration
+// Server-side slide configuration using dynamic discovery
 // This file runs only on the server, keeping client bundle minimal
+
+import { discoverSlides, getSlideMetadata, getAllSlideIds as getAllSlideIdsFromDiscovery, getFirstSlideId as getFirstSlideIdFromDiscovery } from './slide-discovery';
 
 export interface SlideConfig {
     id: string;
@@ -7,46 +9,6 @@ export interface SlideConfig {
     order: number;
     filename: string;
 }
-
-// Static slide configuration - no runtime discovery needed
-export const SLIDES_CONFIG: Record<string, SlideConfig> = {
-    intro: {
-        id: 'intro',
-        title: 'Introduction',
-        order: 0,
-        filename: '01-intro.mdx'
-    },
-    alfa: {
-        id: 'alfa',
-        title: 'Alpha Features',
-        order: 1,
-        filename: '02-alfa.mdx'
-    },
-    beta: {
-        id: 'beta',
-        title: 'Beta Release',
-        order: 2,
-        filename: '03-beta.mdx'
-    },
-    charlie: {
-        id: 'charlie',
-        title: 'Charlie Updates',
-        order: 3,
-        filename: '04-charlie.mdx'
-    },
-    delta: {
-        id: 'delta',
-        title: 'Delta Changes',
-        order: 4,
-        filename: '05-delta.mdx'
-    },
-    end: { id: 'end', title: 'Conclusion', order: 5, filename: '06-end.mdx' }
-} as const;
-
-// Ordered list of slide IDs for navigation
-export const SLIDE_ORDER = Object.keys(SLIDES_CONFIG).sort(
-    (a, b) => SLIDES_CONFIG[a].order - SLIDES_CONFIG[b].order
-);
 
 export interface SlideNavigation {
     slideId: string;
@@ -57,44 +19,52 @@ export interface SlideNavigation {
     title: string;
 }
 
+
 // Server-side slide resolution - runs at request time
-export function getSlideNavigation(slideId: string): SlideNavigation {
-    const currentIndex = SLIDE_ORDER.indexOf(slideId);
+export async function getSlideNavigation(slideId: string): Promise<SlideNavigation> {
+    const allSlideIds = await getAllSlideIdsFromDiscovery();
+    const currentIndex = allSlideIds.indexOf(slideId);
 
     if (currentIndex === -1) {
         // Invalid slide, return first slide data
-        const firstSlideId = SLIDE_ORDER[0];
+        const firstSlideId = await getFirstSlideIdFromDiscovery();
+        const firstSlideMetadata = await getSlideMetadata(firstSlideId);
+        
         return {
             slideId: firstSlideId,
             currentIndex: 0,
-            totalSlides: SLIDE_ORDER.length,
-            nextSlide: SLIDE_ORDER[1] || null,
+            totalSlides: allSlideIds.length,
+            nextSlide: allSlideIds[1] || null,
             prevSlide: null,
-            title: SLIDES_CONFIG[firstSlideId].title
+            title: firstSlideMetadata?.title || 'Untitled Slide'
         };
     }
+
+    const slideMetadata = await getSlideMetadata(slideId);
 
     return {
         slideId,
         currentIndex,
-        totalSlides: SLIDE_ORDER.length,
-        nextSlide: SLIDE_ORDER[currentIndex + 1] || null,
-        prevSlide: SLIDE_ORDER[currentIndex - 1] || null,
-        title: SLIDES_CONFIG[slideId].title
+        totalSlides: allSlideIds.length,
+        nextSlide: allSlideIds[currentIndex + 1] || null,
+        prevSlide: allSlideIds[currentIndex - 1] || null,
+        title: slideMetadata?.title || 'Untitled Slide'
     };
 }
 
 // Check if a slide exists
-export function slideExists(slideId: string): boolean {
-    return slideId in SLIDES_CONFIG;
+export async function slideExists(slideId: string): Promise<boolean> {
+    const metadata = await getSlideMetadata(slideId);
+    return metadata !== null;
 }
 
 // Get first slide ID
-export function getFirstSlideId(): string {
-    return SLIDE_ORDER[0];
+export async function getFirstSlideId(): Promise<string> {
+    return await getFirstSlideIdFromDiscovery();
 }
 
 // Get all slide IDs in order for navigation
-export function getAllSlideIds(): string[] {
-    return [...SLIDE_ORDER];
+export async function getAllSlideIds(): Promise<string[]> {
+    return await getAllSlideIdsFromDiscovery();
 }
+

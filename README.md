@@ -51,7 +51,7 @@ npm run dev
 The application provides two main routes:
 
 - **`/`** - Home page with navigation to start slideshow
-- **`/slides/{slide-id}`** - Full-screen presentation mode (e.g., `/slides/01-intro`)
+- **`/slides/{slide-id}`** - Full-screen presentation mode (e.g., `/slides/intro`)
 
 ### Navigation Controls
 
@@ -64,10 +64,15 @@ In presentation mode (`/slides/{slide-id}`):
 ### Creating New Slides
 
 1. Create a new `.mdx` file in `app/routes/slides/`
-2. Use numeric prefixes for ordering: `07-new-slide.mdx`
+2. Add frontmatter with `order` field for ordering
 3. Write your slide content using MDX:
 
 ```mdx
+---
+title: Your Slide Title
+order: 7
+---
+
 # Your Slide Title
 
 Write your slide content using Markdown and React components.
@@ -81,14 +86,14 @@ Write your slide content using Markdown and React components.
 
 ### Slide Structure
 
-Slides are organized with the following naming convention:
+Slides are ordered by the `order` field in frontmatter:
 
-- `01-intro.mdx` - Introduction slide
-- `02-alfa.mdx` - First content slide
-- `03-beta.mdx` - Second content slide
-- `04-charlie.mdx` - Third content slide
-- `05-delta.mdx` - Fourth content slide
-- `06-end.mdx` - Closing slide
+- `intro.mdx` (order: 1) - Introduction slide
+- `alfa.mdx` (order: 2) - First content slide
+- `beta.mdx` (order: 3) - Second content slide
+- `charlie.mdx` (order: 4) - Third content slide
+- `delta.mdx` (order: 5) - Fourth content slide
+- `end.mdx` (order: 6) - Closing slide
 
 ## 🏗️ Architecture
 
@@ -97,12 +102,12 @@ Slides are organized with the following naming convention:
 ```text
 app/
 ├── routes/
-│   ├── slides/           # MDX slide files (01-intro.mdx, 02-alfa.mdx, etc.)
+│   ├── slides/           # MDX slide files (intro.mdx, alfa.mdx, etc.)
 │   ├── home.tsx          # Landing page
 │   └── stage.tsx         # Presentation component
 ├── utils/
-│   ├── slide-discovery.ts # Auto-discovery logic
-│   └── common.ts         # Shared utilities (currently minimal)
+│   ├── slide-discovery.ts # Dynamic slide discovery using Vite glob
+│   └── slides.server.ts  # Server-side slide navigation
 ├── types/                # TypeScript definitions
 ├── images/               # Static assets
 ├── app.css              # Global styles

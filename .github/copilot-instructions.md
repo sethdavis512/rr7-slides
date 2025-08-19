@@ -14,13 +14,13 @@ This is a **React Router 7 slideshow application** built with TypeScript, MDX, a
 ### Slide Discovery System (`app/utils/slide-discovery.ts`)
 
 - Uses `import.meta.glob('../routes/slides/*.mdx', { eager: false })` for lazy loading
-- Extracts order from filename prefixes or falls back to alphabetical
+- Extracts order from frontmatter `order` field, not filename
 - Caches slide metadata in `cachedSlides` to avoid repeated discovery
-- Provides navigation helpers: `getNextSlideId()`, `getPreviousSlideId()`
+- Provides slide component loading and metadata extraction
 
 ### Presentation Controller (`app/routes/stage.tsx`)
 
-- Dynamic imports slide components using `importSlide(slideId)`
+- Dynamic imports slide components using `getSlideComponent(slideId)`
 - Handles keyboard navigation via `useEffect` with event listeners
 - Uses `Suspense` for loading states during component imports
 - Redirects invalid slide IDs to first slide
@@ -35,10 +35,10 @@ This is a **React Router 7 slideshow application** built with TypeScript, MDX, a
 
 **Creating New Slides:**
 
-1. Add `.mdx` file to `app/routes/slides/` with numeric prefix (e.g., `07-new-topic.mdx`)
-2. Include frontmatter: `---\ntitle: Slide Title\n---`
+1. Add `.mdx` file to `app/routes/slides/` with descriptive name (e.g., `new-topic.mdx`)
+2. Include frontmatter: `---\ntitle: Slide Title\norder: 7\n---`
 3. Use TailwindCSS classes for PowerPoint-inspired layouts
-4. Slide auto-discovered on next navigation
+4. Slide auto-discovered and ordered by frontmatter
 
 **Key Commands:**
 
@@ -74,7 +74,7 @@ This is a **React Router 7 slideshow application** built with TypeScript, MDX, a
 
 ## File Naming Conventions
 
-- Slides: `{order}-{name}.mdx` (e.g., `01-intro.mdx`, `02-alfa.mdx`)
+- Slides: `{name}.mdx` with frontmatter `order` field (e.g., `intro.mdx`, `alfa.mdx`)
 - Routes follow React Router 7 conventions in `app/routes.ts`
 - Home route at index, stage at `slides/:slideId`
 

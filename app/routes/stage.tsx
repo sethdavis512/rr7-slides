@@ -1,27 +1,28 @@
 import { Link, useNavigate } from 'react-router';
-import { useEffect } from 'react';
+import { useEffect, Suspense, useState } from 'react';
 import { getSlideNavigation, slideExists, getFirstSlideId, getAllSlideIds } from '../utils/slides.server';
-import { getSlideComponent } from '../utils/slide-components';
+import { getSlideComponent } from '../utils/slide-discovery';
 import type { Route } from './+types/stage';
 
 // Server-side loader - all slide resolution happens on the server
 export async function loader({ params }: Route.LoaderArgs) {
-    const { slideId = getFirstSlideId() } = params;
+    const slideId = params.slideId || await getFirstSlideId();
 
     // Server-side slide validation and navigation data
-    if (!slideExists(slideId)) {
+    if (!(await slideExists(slideId))) {
         // Redirect to first slide if invalid
+        const firstSlideId = await getFirstSlideId();
         throw new Response('', {
             status: 302,
             headers: {
-                Location: `/slides/${getFirstSlideId()}`
+                Location: `/slides/${firstSlideId}`
             }
         });
     }
 
     // Get all navigation data on the server
-    const navigation = getSlideNavigation(slideId);
-    const allSlideIds = getAllSlideIds();
+    const navigation = await getSlideNavigation(slideId);
+    const allSlideIds = await getAllSlideIds();
     
     return {
         ...navigation,
@@ -29,12 +30,67 @@ export async function loader({ params }: Route.LoaderArgs) {
     };
 }
 
+// Slide component wrapper with error boundary
+function SlideComponentWrapper({ slideId }: { slideId: string }) {
+    const [SlideComponent, setSlideComponent] = useState<React.ComponentType | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadSlide() {
+            try {
+                const component = await getSlideComponent(slideId);
+                if (isMounted) {
+                    if (component) {
+                        setSlideComponent(() => component);
+                        setError(null);
+                    } else {
+                        setError('Slide not found');
+                    }
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError(err instanceof Error ? err.message : 'Failed to load slide');
+                }
+            }
+        }
+
+        loadSlide();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [slideId]);
+
+    if (error) {
+        return (
+            <div className="h-full flex items-center justify-center">
+                <div className="text-center text-white">
+                    <h1 className="text-2xl mb-4">Error Loading Slide</h1>
+                    <p className="text-gray-300">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!SlideComponent) {
+        return (
+            <div className="h-full flex items-center justify-center">
+                <div className="text-center text-white">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-300">Loading slide...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return <SlideComponent />;
+}
+
 export default function StageRoute({ loaderData }: Route.ComponentProps) {
     const navigate = useNavigate();
     const { slideId, currentIndex, totalSlides, nextSlide, prevSlide, title, allSlideIds } = loaderData;
-    
-    // Get the slide component - resolved at build time, not runtime
-    const SlideComponent = getSlideComponent(slideId);
 
     // Minimal client-side keyboard navigation
     useEffect(() => {
@@ -50,26 +106,26 @@ export default function StageRoute({ loaderData }: Route.ComponentProps) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [navigate, nextSlide, prevSlide]);
 
-    // No loading states needed - component is available immediately
-    if (!SlideComponent) {
-        return (
-            <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="text-center">
-                    <h1 className="text-2xl">Slide not found</h1>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="w-screen h-screen relative bg-gray-900 text-white overflow-hidden">
             {/* Slide title for SEO and accessibility */}
-            <title>{title} - React Router 7 Slides</title>
+            <title>{`${title} - React Router 7 Slides`}</title>
             
             <div className="px-32 py-16 pb-32 xl:px-24 md:px-16 h-full flex items-center justify-center">
                 <div className="max-w-4xl w-full">
-                    {/* Server-rendered slide component - no Suspense needed */}
-                    <SlideComponent />
+                    {/* Dynamically loaded slide component with Suspense */}
+                    <Suspense 
+                        fallback={
+                            <div className="h-full flex items-center justify-center">
+                                <div className="text-center text-white">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                                    <p className="text-gray-300">Loading slide...</p>
+                                </div>
+                            </div>
+                        }
+                    >
+                        <SlideComponentWrapper slideId={slideId} />
+                    </Suspense>
                 </div>
             </div>
 
