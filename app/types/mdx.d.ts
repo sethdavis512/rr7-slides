@@ -1,4 +1,7 @@
 declare module '*.mdx' {
-    let MDXComponent: (props: any) => JSX.Element;
+    import type { ComponentType } from 'react';
+
+    const MDXComponent: ComponentType;
+    export const frontmatter: Record<string, unknown>;
     export default MDXComponent;
 }

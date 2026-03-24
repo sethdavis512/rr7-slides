@@ -33,8 +33,8 @@ This is a **React Router 7 slideshow application** with **dynamic slide discover
 ### Core Files
 
 - `app/utils/slide-discovery.ts` - Dynamic slide discovery using Vite glob with frontmatter parsing
-- `app/utils/slides.server.ts` - Server-side slide navigation and validation (uses discovery system)
-- `app/routes/stage.tsx` - Main presentation route with dynamic imports and Suspense
+- `app/utils/slides.server.ts` - Server-side slide navigation and validation (re-exports from discovery)
+- `app/routes/stage.tsx` - Main presentation route with dynamic imports and loading states
 - `app/routes.ts` - Route configuration (index and slides/:slideId)
 - `react-router.config.ts` - SSR enabled
 - `vite.config.ts` - MDX configuration with frontmatter support
@@ -42,6 +42,7 @@ This is a **React Router 7 slideshow application** with **dynamic slide discover
 ### Slide Structure
 
 Slides use frontmatter for metadata:
+
 ```yaml
 ---
 title: Slide Title
@@ -63,13 +64,14 @@ order: 1
 ### Dynamic Loading Architecture
 
 - **Lazy Loading**: Components loaded on-demand using dynamic imports
-- **Suspense**: Loading states handled with React Suspense boundaries
+- **State-based Loading**: `SlideComponentWrapper` uses `useState`/`useEffect` with error and loading states
 - **Caching**: Slide metadata cached after first discovery
 - **Error Handling**: Graceful fallbacks for missing slides or load failures
 
 ### Slide Layout Patterns
 
 Slides use full-screen layouts with responsive padding:
+
 - Container: `px-32 py-16 pb-32 xl:px-24 md:px-16 h-full flex items-center justify-center`
 - Typography: Main titles use `text-7xl md:text-8xl lg:text-9xl`
 - Brand colors: Blue accent (`bg-blue-500`), dark theme (`bg-gray-900`)

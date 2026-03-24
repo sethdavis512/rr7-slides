@@ -1,9 +1,13 @@
+import { Link } from 'react-router';
 import type { Route } from './+types/home';
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_args: Route.MetaArgs) {
     return [
-        { title: 'New React Router App' },
-        { name: 'description', content: 'Welcome to React Router!' }
+        { title: 'RR7 Slides' },
+        {
+            name: 'description',
+            content: 'A presentation built with React Router 7'
+        }
     ];
 }
 
@@ -19,12 +23,13 @@ export default function Home() {
                     <br />
                     Click below to begin your slides.
                 </p>
-                <a
-                    href="/slides/intro"
+                <Link
+                    to="/slides/intro"
+                    prefetch="intent"
                     className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 text-lg shadow-lg hover:shadow-xl hover:scale-105"
                 >
                     Go to First Slide
-                </a>
+                </Link>
             </div>
         </div>
     );

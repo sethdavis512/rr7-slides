@@ -1,12 +1,17 @@
 import { Link, useNavigate } from 'react-router';
-import { useEffect, Suspense, useState } from 'react';
-import { getSlideNavigation, slideExists, getFirstSlideId, getAllSlideIds } from '../utils/slides.server';
+import { useEffect, useState } from 'react';
+import {
+    getSlideNavigation,
+    slideExists,
+    getFirstSlideId,
+    getAllSlideIds
+} from '../utils/slides.server';
 import { getSlideComponent } from '../utils/slide-discovery';
 import type { Route } from './+types/stage';
 
 // Server-side loader - all slide resolution happens on the server
 export async function loader({ params }: Route.LoaderArgs) {
-    const slideId = params.slideId || await getFirstSlideId();
+    const slideId = params.slideId || (await getFirstSlideId());
 
     // Server-side slide validation and navigation data
     if (!(await slideExists(slideId))) {
@@ -23,7 +28,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     // Get all navigation data on the server
     const navigation = await getSlideNavigation(slideId);
     const allSlideIds = await getAllSlideIds();
-    
+
     return {
         ...navigation,
         allSlideIds
@@ -32,7 +37,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 // Slide component wrapper with error boundary
 function SlideComponentWrapper({ slideId }: { slideId: string }) {
-    const [SlideComponent, setSlideComponent] = useState<React.ComponentType | null>(null);
+    const [SlideComponent, setSlideComponent] =
+        useState<React.ComponentType | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -51,7 +57,11 @@ function SlideComponentWrapper({ slideId }: { slideId: string }) {
                 }
             } catch (err) {
                 if (isMounted) {
-                    setError(err instanceof Error ? err.message : 'Failed to load slide');
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : 'Failed to load slide'
+                    );
                 }
             }
         }
@@ -90,7 +100,15 @@ function SlideComponentWrapper({ slideId }: { slideId: string }) {
 
 export default function StageRoute({ loaderData }: Route.ComponentProps) {
     const navigate = useNavigate();
-    const { slideId, currentIndex, totalSlides, nextSlide, prevSlide, title, allSlideIds } = loaderData;
+    const {
+        slideId,
+        currentIndex,
+        totalSlides,
+        nextSlide,
+        prevSlide,
+        title,
+        allSlideIds
+    } = loaderData;
 
     // Minimal client-side keyboard navigation
     useEffect(() => {
@@ -110,22 +128,10 @@ export default function StageRoute({ loaderData }: Route.ComponentProps) {
         <div className="w-screen h-screen relative bg-gray-900 text-white overflow-hidden">
             {/* Slide title for SEO and accessibility */}
             <title>{`${title} - React Router 7 Slides`}</title>
-            
+
             <div className="px-32 py-16 pb-32 xl:px-24 md:px-16 h-full flex items-center justify-center">
                 <div className="max-w-4xl w-full">
-                    {/* Dynamically loaded slide component with Suspense */}
-                    <Suspense 
-                        fallback={
-                            <div className="h-full flex items-center justify-center">
-                                <div className="text-center text-white">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                                    <p className="text-gray-300">Loading slide...</p>
-                                </div>
-                            </div>
-                        }
-                    >
-                        <SlideComponentWrapper slideId={slideId} />
-                    </Suspense>
+                    <SlideComponentWrapper slideId={slideId} />
                 </div>
             </div>
 
@@ -181,7 +187,7 @@ export default function StageRoute({ loaderData }: Route.ComponentProps) {
                 <div className="flex space-x-2">
                     {allSlideIds.map((targetSlideId, slideIndex) => {
                         const isActive = slideIndex === currentIndex;
-                        
+
                         return (
                             <Link
                                 key={slideIndex}

@@ -10,7 +10,7 @@ export interface SlideMetadata {
 }
 
 // Use Vite's glob to discover all MDX slides
-const slideModules = import.meta.glob('../routes/slides/*.mdx', { 
+const slideModules = import.meta.glob('../routes/slides/*.mdx', {
     eager: false
 });
 
@@ -23,12 +23,18 @@ function extractSlideId(filePath: string): string {
     return filename.replace('.mdx', '');
 }
 
+interface MDXModule {
+    default: React.ComponentType;
+    frontmatter?: { title?: string; order?: number };
+}
+
 // Parse frontmatter from MDX module
-async function parseSlideFrontmatter(moduleLoader: () => Promise<any>): Promise<{ title: string; order: number }> {
+async function parseSlideFrontmatter(
+    moduleLoader: () => Promise<MDXModule>
+): Promise<{ title: string; order: number }> {
     try {
         const module = await moduleLoader();
-        // Extract frontmatter from the MDX module
-        const frontmatter = (module as any)?.frontmatter || {};
+        const frontmatter = module.frontmatter ?? {};
         return {
             title: frontmatter.title || 'Untitled Slide',
             order: frontmatter.order || 0
@@ -52,7 +58,8 @@ export async function discoverSlides(): Promise<SlideMetadata[]> {
 
     for (const [filePath, moduleLoader] of Object.entries(slideModules)) {
         const slideId = extractSlideId(filePath);
-        const { title, order } = await parseSlideFrontmatter(moduleLoader);
+        const loader = moduleLoader as () => Promise<MDXModule>;
+        const { title, order } = await parseSlideFrontmatter(loader);
 
         slides.push({
             id: slideId,
@@ -60,8 +67,8 @@ export async function discoverSlides(): Promise<SlideMetadata[]> {
             order,
             filename: filePath.split('/').pop() || '',
             component: async () => {
-                const module = await moduleLoader();
-                return (module as any).default;
+                const module = await loader();
+                return module.default;
             }
         });
     }
@@ -75,22 +82,26 @@ export async function discoverSlides(): Promise<SlideMetadata[]> {
 }
 
 // Get slide metadata by ID
-export async function getSlideMetadata(slideId: string): Promise<SlideMetadata | null> {
+export async function getSlideMetadata(
+    slideId: string
+): Promise<SlideMetadata | null> {
     const slides = await discoverSlides();
-    return slides.find(slide => slide.id === slideId) || null;
+    return slides.find((slide) => slide.id === slideId) || null;
 }
 
 // Get all slide IDs in order
 export async function getAllSlideIds(): Promise<string[]> {
     const slides = await discoverSlides();
-    return slides.map(slide => slide.id);
+    return slides.map((slide) => slide.id);
 }
 
 // Get slide component by ID
-export async function getSlideComponent(slideId: string): Promise<React.ComponentType | null> {
+export async function getSlideComponent(
+    slideId: string
+): Promise<React.ComponentType | null> {
     const metadata = await getSlideMetadata(slideId);
     if (!metadata) return null;
-    
+
     try {
         return await metadata.component();
     } catch (error) {
@@ -99,10 +110,8 @@ export async function getSlideComponent(slideId: string): Promise<React.Componen
     }
 }
 
-
 // Get first slide ID
 export async function getFirstSlideId(): Promise<string> {
     const slides = await discoverSlides();
     return slides[0]?.id || '';
 }
-

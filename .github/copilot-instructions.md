@@ -6,8 +6,8 @@ This is a **React Router 7 slideshow application** built with TypeScript, MDX, a
 
 - **React Router 7**: File-based routing with SSR enabled by default (`react-router.config.ts`)
 - **MDX Slides**: Presentation content lives in `app/routes/slides/*.mdx` with frontmatter metadata
-- **Dynamic Discovery**: Vite's `import.meta.glob` automatically finds and orders slides by filename prefix (`01-`, `02-`, etc.)
-- **Presentation Mode**: Full-screen slides at `/slides/{slideId}` with keyboard navigation (arrows, spacebar)
+- **Dynamic Discovery**: Vite's `import.meta.glob` automatically finds slides; order controlled by frontmatter `order` field
+- **Presentation Mode**: Full-screen slides at `/slides/{slideId}` with keyboard navigation (arrows)
 
 ## Key Components & Patterns
 

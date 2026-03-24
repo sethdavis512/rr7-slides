@@ -1,14 +1,13 @@
 // Server-side slide configuration using dynamic discovery
 // This file runs only on the server, keeping client bundle minimal
 
-import { discoverSlides, getSlideMetadata, getAllSlideIds as getAllSlideIdsFromDiscovery, getFirstSlideId as getFirstSlideIdFromDiscovery } from './slide-discovery';
+import {
+    getSlideMetadata,
+    getAllSlideIds,
+    getFirstSlideId
+} from './slide-discovery';
 
-export interface SlideConfig {
-    id: string;
-    title: string;
-    order: number;
-    filename: string;
-}
+export { getAllSlideIds, getFirstSlideId };
 
 export interface SlideNavigation {
     slideId: string;
@@ -19,17 +18,17 @@ export interface SlideNavigation {
     title: string;
 }
 
-
 // Server-side slide resolution - runs at request time
-export async function getSlideNavigation(slideId: string): Promise<SlideNavigation> {
-    const allSlideIds = await getAllSlideIdsFromDiscovery();
+export async function getSlideNavigation(
+    slideId: string
+): Promise<SlideNavigation> {
+    const allSlideIds = await getAllSlideIds();
     const currentIndex = allSlideIds.indexOf(slideId);
 
     if (currentIndex === -1) {
-        // Invalid slide, return first slide data
-        const firstSlideId = await getFirstSlideIdFromDiscovery();
+        const firstSlideId = await getFirstSlideId();
         const firstSlideMetadata = await getSlideMetadata(firstSlideId);
-        
+
         return {
             slideId: firstSlideId,
             currentIndex: 0,
@@ -57,14 +56,3 @@ export async function slideExists(slideId: string): Promise<boolean> {
     const metadata = await getSlideMetadata(slideId);
     return metadata !== null;
 }
-
-// Get first slide ID
-export async function getFirstSlideId(): Promise<string> {
-    return await getFirstSlideIdFromDiscovery();
-}
-
-// Get all slide IDs in order for navigation
-export async function getAllSlideIds(): Promise<string[]> {
-    return await getAllSlideIdsFromDiscovery();
-}
-
