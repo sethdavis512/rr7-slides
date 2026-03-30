@@ -4,3 +4,9 @@
 # React Router
 /.react-router/
 /build/
+
+# Claude Code
+.claude/
+
+# Test output
+/test-results/
