@@ -9,33 +9,45 @@ import {
 import { getSlideComponent } from '../utils/slide-discovery';
 import type { Route } from './+types/stage';
 
+const VALID_THEMES = ['ink', 'warm', 'sharp'] as const;
+type ThemeId = (typeof VALID_THEMES)[number];
+
+function isValidTheme(id: string): id is ThemeId {
+    return VALID_THEMES.includes(id as ThemeId);
+}
+
 // Server-side loader - all slide resolution happens on the server
 export async function loader({ params }: Route.LoaderArgs) {
+    const themeId = isValidTheme(params.themeId)
+        ? params.themeId
+        : 'ink';
     const slideId = params.slideId || (await getFirstSlideId());
 
-    // Server-side slide validation and navigation data
-    if (!(await slideExists(slideId))) {
-        // Redirect to first slide if invalid
-        const firstSlideId = await getFirstSlideId();
+    if (!isValidTheme(params.themeId)) {
         throw new Response('', {
             status: 302,
-            headers: {
-                Location: `/slides/${firstSlideId}`
-            }
+            headers: { Location: `/ink/slides/${slideId}` }
         });
     }
 
-    // Get all navigation data on the server
+    if (!(await slideExists(slideId))) {
+        const firstSlideId = await getFirstSlideId();
+        throw new Response('', {
+            status: 302,
+            headers: { Location: `/${themeId}/slides/${firstSlideId}` }
+        });
+    }
+
     const navigation = await getSlideNavigation(slideId);
     const allSlideIds = await getAllSlideIds();
 
     return {
         ...navigation,
-        allSlideIds
+        allSlideIds,
+        themeId
     };
 }
 
-// Slide component wrapper with error boundary
 function SlideComponentWrapper({ slideId }: { slideId: string }) {
     const [SlideComponent, setSlideComponent] =
         useState<React.ComponentType | null>(null);
@@ -76,9 +88,11 @@ function SlideComponentWrapper({ slideId }: { slideId: string }) {
     if (error) {
         return (
             <div className="h-full flex items-center justify-center">
-                <div className="text-center text-white">
-                    <h1 className="text-2xl mb-4">Error Loading Slide</h1>
-                    <p className="text-gray-300">{error}</p>
+                <div className="text-center">
+                    <h1 className="text-2xl font-display text-ink mb-4">
+                        Error Loading Slide
+                    </h1>
+                    <p className="text-ink-secondary">{error}</p>
                 </div>
             </div>
         );
@@ -87,10 +101,7 @@ function SlideComponentWrapper({ slideId }: { slideId: string }) {
     if (!SlideComponent) {
         return (
             <div className="h-full flex items-center justify-center">
-                <div className="text-center text-white">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-300">Loading slide...</p>
-                </div>
+                <p className="text-ink-tertiary animate-pulse">Loading...</p>
             </div>
         );
     }
@@ -107,48 +118,69 @@ export default function StageRoute({ loaderData }: Route.ComponentProps) {
         nextSlide,
         prevSlide,
         title,
-        allSlideIds
+        allSlideIds,
+        transitionMap,
+        themeId
     } = loaderData;
 
-    // Minimal client-side keyboard navigation
+    const base = `/${themeId}/slides`;
+
+    function setNavAttrs(
+        targetSlideId: string,
+        direction: 'forward' | 'back'
+    ) {
+        const el = document.documentElement;
+        el.dataset.nav = direction;
+        el.dataset.transition = transitionMap[targetSlideId] ?? 'depth';
+    }
+
+    function navigateSlide(to: string, direction: 'forward' | 'back') {
+        setNavAttrs(to, direction);
+        navigate(`${base}/${to}`, { viewTransition: true });
+    }
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'ArrowLeft' && prevSlide) {
-                navigate(`/slides/${prevSlide}`);
+                navigateSlide(prevSlide, 'back');
             } else if (event.key === 'ArrowRight' && nextSlide) {
-                navigate(`/slides/${nextSlide}`);
+                navigateSlide(nextSlide, 'forward');
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [navigate, nextSlide, prevSlide]);
+    }, [navigate, nextSlide, prevSlide, base]);
 
     return (
-        <div className="w-screen h-screen relative bg-gray-900 text-white overflow-hidden">
-            {/* Slide title for SEO and accessibility */}
+        <div
+            data-theme={themeId}
+            className="w-screen h-screen relative bg-surface text-ink overflow-hidden"
+        >
             <title>{`${title} - React Router 7 Slides`}</title>
 
-            <div className="px-32 py-16 pb-32 xl:px-24 md:px-16 h-full flex items-center justify-center">
-                <div className="max-w-4xl w-full">
+            <div className="slide-container px-24 py-16 pb-28 h-full flex items-center justify-center">
+                <div className="max-w-5xl w-full">
                     <SlideComponentWrapper slideId={slideId} />
                 </div>
             </div>
 
-            {/* Navigation buttons with Link for prefetching */}
+            {/* Navigation arrows */}
             {prevSlide && (
                 <Link
-                    to={`/slides/${prevSlide}`}
-                    className="absolute left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-90 hover:bg-opacity-100 text-white p-4 rounded-full transition-all border border-gray-600 hover:border-gray-400 shadow-lg"
+                    to={`${base}/${prevSlide}`}
+                    className="absolute left-8 top-1/2 -translate-y-1/2 p-3 text-ink-tertiary hover:text-ink transition-colors"
                     aria-label="Previous slide"
                     prefetch="intent"
+                    viewTransition
+                    onClick={() => setNavAttrs(prevSlide, 'back')}
                 >
                     <svg
                         className="w-5 h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        strokeWidth={3}
+                        strokeWidth={2}
                     >
                         <path
                             strokeLinecap="round"
@@ -161,17 +193,19 @@ export default function StageRoute({ loaderData }: Route.ComponentProps) {
 
             {nextSlide && (
                 <Link
-                    to={`/slides/${nextSlide}`}
-                    className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-90 hover:bg-opacity-100 text-white p-4 rounded-full transition-all border border-gray-600 hover:border-gray-400 shadow-lg"
+                    to={`${base}/${nextSlide}`}
+                    className="absolute right-8 top-1/2 -translate-y-1/2 p-3 text-ink-tertiary hover:text-ink transition-colors"
                     aria-label="Next slide"
                     prefetch="intent"
+                    viewTransition
+                    onClick={() => setNavAttrs(nextSlide, 'forward')}
                 >
                     <svg
                         className="w-5 h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        strokeWidth={3}
+                        strokeWidth={2}
                     >
                         <path
                             strokeLinecap="round"
@@ -182,32 +216,58 @@ export default function StageRoute({ loaderData }: Route.ComponentProps) {
                 </Link>
             )}
 
-            {/* Slide indicator with Link prefetching */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-                <div className="flex space-x-2">
-                    {allSlideIds.map((targetSlideId, slideIndex) => {
-                        const isActive = slideIndex === currentIndex;
-
-                        return (
-                            <Link
-                                key={slideIndex}
-                                to={`/slides/${targetSlideId}`}
-                                className={`w-3 h-3 rounded-full transition-all cursor-pointer hover:scale-110 ${
-                                    isActive
-                                        ? 'bg-white opacity-100'
-                                        : 'bg-white opacity-25 hover:opacity-50'
-                                }`}
-                                aria-label={`Go to slide ${slideIndex + 1}`}
-                                prefetch="intent"
-                            />
-                        );
-                    })}
+            {/* Slide indicators */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                <div className="flex gap-2">
+                    {allSlideIds.map((targetSlideId, slideIndex) => (
+                        <Link
+                            key={targetSlideId}
+                            to={`${base}/${targetSlideId}`}
+                            className={`w-2 h-2 rounded-full transition-colors ${
+                                slideIndex === currentIndex
+                                    ? 'bg-ink'
+                                    : 'bg-ink-tertiary hover:bg-ink-secondary'
+                            }`}
+                            aria-label={`Go to slide ${slideIndex + 1}`}
+                            prefetch="intent"
+                            viewTransition
+                            onClick={() =>
+                                setNavAttrs(
+                                    targetSlideId,
+                                    slideIndex > currentIndex
+                                        ? 'forward'
+                                        : 'back'
+                                )
+                            }
+                        />
+                    ))}
                 </div>
             </div>
 
-            {/* Slide counter */}
-            <div className="absolute top-8 right-8 text-sm opacity-70">
-                {currentIndex + 1} / {totalSlides}
+            {/* Slide counter + home link */}
+            <div className="absolute top-8 left-8 right-8 flex items-center justify-between text-sm text-ink-tertiary">
+                <Link
+                    to="/"
+                    className="flex items-center gap-2 hover:text-ink transition-colors"
+                >
+                    <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                        />
+                    </svg>
+                    <span>Themes</span>
+                </Link>
+                <span className="tabular-nums">
+                    {currentIndex + 1} / {totalSlides}
+                </span>
             </div>
         </div>
     );

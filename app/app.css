@@ -1,62 +1,346 @@
 @import 'tailwindcss';
 
 @theme {
-    --font-sans:
-        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  /* Declare tokens so Tailwind generates utility classes.
+     Actual values are set per-theme below via [data-theme] selectors. */
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+
+  --color-surface: oklch(97% 0.005 250);
+  --color-surface-raised: oklch(93% 0.008 250);
+  --color-ink: oklch(18% 0.015 250);
+  --color-ink-secondary: oklch(38% 0.015 250);
+  --color-ink-tertiary: oklch(52% 0.01 250);
+  --color-accent: oklch(50% 0.19 250);
+  --color-accent-dim: oklch(50% 0.19 250 / 0.08);
+  --color-rule: oklch(85% 0.01 250);
 }
+
+
+/* ============================================================
+   THEMES
+
+   Each theme sets the Tailwind token variables directly.
+   Applied via data-theme attribute on a container element.
+   :root defaults to "ink" for backwards compatibility.
+   ============================================================ */
+
+/* --- INK (default) ---
+   Quiet luxury. Instrument Serif + Outfit. Cool blue-tinted neutrals. */
+
+:root,
+[data-theme='ink'] {
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+  --color-surface: oklch(97% 0.005 250);
+  --color-surface-raised: oklch(93% 0.008 250);
+  --color-ink: oklch(18% 0.015 250);
+  --color-ink-secondary: oklch(38% 0.015 250);
+  --color-ink-tertiary: oklch(52% 0.01 250);
+  --color-accent: oklch(50% 0.19 250);
+  --color-accent-dim: oklch(50% 0.19 250 / 0.08);
+  --color-rule: oklch(85% 0.01 250);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root,
+  [data-theme='ink'] {
+    --color-surface: oklch(13% 0.01 250);
+    --color-surface-raised: oklch(18% 0.012 250);
+    --color-ink: oklch(92% 0.005 250);
+    --color-ink-secondary: oklch(68% 0.01 250);
+    --color-ink-tertiary: oklch(48% 0.01 250);
+    --color-accent: oklch(68% 0.12 250);
+    --color-accent-dim: oklch(68% 0.12 250 / 0.1);
+    --color-rule: oklch(22% 0.015 250);
+    color-scheme: dark;
+  }
+}
+
+/* --- WARM ---
+   Editorial, organic. Fraunces + DM Sans. Warm cream-tinted neutrals.
+   Terracotta/amber accent (hue 55). */
+
+[data-theme='warm'] {
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --color-surface: oklch(96% 0.012 75);
+  --color-surface-raised: oklch(92% 0.018 70);
+  --color-ink: oklch(20% 0.02 55);
+  --color-ink-secondary: oklch(38% 0.02 55);
+  --color-ink-tertiary: oklch(52% 0.015 55);
+  --color-accent: oklch(55% 0.16 55);
+  --color-accent-dim: oklch(55% 0.16 55 / 0.1);
+  --color-rule: oklch(86% 0.015 70);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme='warm'] {
+    --color-surface: oklch(14% 0.01 55);
+    --color-surface-raised: oklch(19% 0.015 55);
+    --color-ink: oklch(91% 0.008 70);
+    --color-ink-secondary: oklch(68% 0.012 65);
+    --color-ink-tertiary: oklch(48% 0.01 60);
+    --color-accent: oklch(70% 0.14 55);
+    --color-accent-dim: oklch(70% 0.14 55 / 0.1);
+    --color-rule: oklch(23% 0.015 55);
+    color-scheme: dark;
+  }
+}
+
+/* --- SHARP ---
+   Brutalist, high-contrast. Space Grotesk for both display and body.
+   Minimal tint on neutrals. Red accent (hue 25). */
+
+[data-theme='sharp'] {
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --color-surface: oklch(99% 0.002 25);
+  --color-surface-raised: oklch(94% 0.004 25);
+  --color-ink: oklch(10% 0.005 25);
+  --color-ink-secondary: oklch(30% 0.008 25);
+  --color-ink-tertiary: oklch(48% 0.005 25);
+  --color-accent: oklch(55% 0.22 25);
+  --color-accent-dim: oklch(55% 0.22 25 / 0.08);
+  --color-rule: oklch(82% 0.005 25);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme='sharp'] {
+    --color-surface: oklch(8% 0.005 25);
+    --color-surface-raised: oklch(14% 0.008 25);
+    --color-ink: oklch(95% 0.003 25);
+    --color-ink-secondary: oklch(72% 0.005 25);
+    --color-ink-tertiary: oklch(50% 0.005 25);
+    --color-accent: oklch(62% 0.2 25);
+    --color-accent-dim: oklch(62% 0.2 25 / 0.1);
+    --color-rule: oklch(18% 0.008 25);
+    color-scheme: dark;
+  }
+}
+
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 
 html,
 body {
-    @apply bg-white dark:bg-gray-950;
-
-    @media (prefers-color-scheme: dark) {
-        color-scheme: dark;
-    }
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  color: var(--color-ink);
 }
 
-/* Keep only styles that can't be easily replicated with Tailwind */
 
-/* Slide transitions */
+/* ============================================================
+   VIEW TRANSITIONS
+
+   Each slide declares a `transition` in its frontmatter.
+   Before navigating, stage.tsx sets two data attributes on <html>:
+     data-nav="forward|back"        (direction)
+     data-transition="depth|fade|lift|zoom|flip|none"  (effect)
+
+   CSS selects on both to pick the right keyframes.
+   ============================================================ */
+
 @media (prefers-reduced-motion: no-preference) {
-    .slide-container {
-        view-transition-name: slide;
-    }
-    
-    /* Add smooth page transitions if supported */
-    ::view-transition-old(slide),
-    ::view-transition-new(slide) {
-        animation-duration: 0.3s;
-        animation-timing-function: ease-in-out;
-    }
-    
-    ::view-transition-old(slide) {
-        animation-name: slide-out;
-    }
-    
-    ::view-transition-new(slide) {
-        animation-name: slide-in;
-    }
+  .slide-container {
+    view-transition-name: slide;
+  }
+
+  /* Keep page chrome (nav arrows, dots, counter) static */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
+  /* Shared easing -- ease-out-expo for natural deceleration */
+  ::view-transition-old(slide),
+  ::view-transition-new(slide) {
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Asymmetric timing: exit fast, enter smooth */
+  ::view-transition-old(slide) {
+    animation-duration: 0.35s;
+  }
+  ::view-transition-new(slide) {
+    animation-duration: 0.65s;
+  }
+
+  /* ----------------------------------------------------------
+     DEPTH (default)
+     ---------------------------------------------------------- */
+  ::view-transition-old(slide) {
+    animation-name: depth-recede-left;
+  }
+  ::view-transition-new(slide) {
+    animation-name: depth-emerge-right;
+  }
+  html[data-nav='back']::view-transition-old(slide) {
+    animation-name: depth-recede-right;
+  }
+  html[data-nav='back']::view-transition-new(slide) {
+    animation-name: depth-emerge-left;
+  }
+
+  /* ----------------------------------------------------------
+     FADE
+     ---------------------------------------------------------- */
+  html[data-transition='fade']::view-transition-old(slide) {
+    animation-name: fade-out;
+    animation-duration: 0.3s;
+  }
+  html[data-transition='fade']::view-transition-new(slide) {
+    animation-name: fade-in;
+    animation-duration: 0.5s;
+  }
+
+  /* ----------------------------------------------------------
+     LIFT
+     ---------------------------------------------------------- */
+  html[data-transition='lift']::view-transition-old(slide) {
+    animation-name: lift-up-out;
+  }
+  html[data-transition='lift']::view-transition-new(slide) {
+    animation-name: lift-up-in;
+  }
+  html[data-transition='lift'][data-nav='back']::view-transition-old(slide) {
+    animation-name: lift-down-out;
+  }
+  html[data-transition='lift'][data-nav='back']::view-transition-new(slide) {
+    animation-name: lift-down-in;
+  }
+
+  /* ----------------------------------------------------------
+     ZOOM
+     ---------------------------------------------------------- */
+  html[data-transition='zoom']::view-transition-old(slide) {
+    animation-name: zoom-in-out;
+  }
+  html[data-transition='zoom']::view-transition-new(slide) {
+    animation-name: zoom-fade-in;
+  }
+  html[data-transition='zoom'][data-nav='back']::view-transition-old(slide) {
+    animation-name: zoom-out-out;
+  }
+  html[data-transition='zoom'][data-nav='back']::view-transition-new(slide) {
+    animation-name: zoom-back-in;
+  }
+
+  /* ----------------------------------------------------------
+     FLIP
+     ---------------------------------------------------------- */
+  html[data-transition='flip']::view-transition-old(slide),
+  html[data-transition='flip']::view-transition-new(slide) {
+    animation-duration: 0.5s;
+    backface-visibility: hidden;
+  }
+  html[data-transition='flip']::view-transition-old(slide) {
+    animation-name: flip-out-forward;
+  }
+  html[data-transition='flip']::view-transition-new(slide) {
+    animation-name: flip-in-forward;
+  }
+  html[data-transition='flip'][data-nav='back']::view-transition-old(slide) {
+    animation-name: flip-out-back;
+  }
+  html[data-transition='flip'][data-nav='back']::view-transition-new(slide) {
+    animation-name: flip-in-back;
+  }
+
+  /* ----------------------------------------------------------
+     NONE
+     ---------------------------------------------------------- */
+  html[data-transition='none']::view-transition-old(slide),
+  html[data-transition='none']::view-transition-new(slide) {
+    animation: none;
+  }
 }
 
-@keyframes slide-out {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+/* --- DEPTH --- */
+@keyframes depth-recede-left {
+  from { opacity: 1; transform: scale(1) translateX(0); filter: blur(0); }
+  to   { opacity: 0; transform: scale(0.95) translateX(-40px); filter: blur(4px); }
+}
+@keyframes depth-emerge-right {
+  from { opacity: 0; transform: scale(1.03) translateX(40px); }
+  to   { opacity: 1; transform: scale(1) translateX(0); }
+}
+@keyframes depth-recede-right {
+  from { opacity: 1; transform: scale(1) translateX(0); filter: blur(0); }
+  to   { opacity: 0; transform: scale(0.95) translateX(40px); filter: blur(4px); }
+}
+@keyframes depth-emerge-left {
+  from { opacity: 0; transform: scale(1.03) translateX(-40px); }
+  to   { opacity: 1; transform: scale(1) translateX(0); }
 }
 
-@keyframes slide-in {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+/* --- FADE --- */
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --- LIFT --- */
+@keyframes lift-up-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-60px) scale(0.97); }
+}
+@keyframes lift-up-in {
+  from { opacity: 0; transform: translateY(60px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lift-down-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(60px) scale(0.97); }
+}
+@keyframes lift-down-in {
+  from { opacity: 0; transform: translateY(-60px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- ZOOM --- */
+@keyframes zoom-in-out {
+  from { opacity: 1; transform: scale(1); filter: blur(0); }
+  to   { opacity: 0; transform: scale(1.15); filter: blur(3px); }
+}
+@keyframes zoom-fade-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes zoom-out-out {
+  from { opacity: 1; transform: scale(1); filter: blur(0); }
+  to   { opacity: 0; transform: scale(0.85); filter: blur(3px); }
+}
+@keyframes zoom-back-in {
+  from { opacity: 0; transform: scale(1.08); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* --- FLIP --- */
+@keyframes flip-out-forward {
+  from { opacity: 1; transform: perspective(1200px) rotateY(0deg); }
+  to   { opacity: 0; transform: perspective(1200px) rotateY(-90deg); }
+}
+@keyframes flip-in-forward {
+  from { opacity: 0; transform: perspective(1200px) rotateY(90deg); }
+  to   { opacity: 1; transform: perspective(1200px) rotateY(0deg); }
+}
+@keyframes flip-out-back {
+  from { opacity: 1; transform: perspective(1200px) rotateY(0deg); }
+  to   { opacity: 0; transform: perspective(1200px) rotateY(90deg); }
+}
+@keyframes flip-in-back {
+  from { opacity: 0; transform: perspective(1200px) rotateY(-90deg); }
+  to   { opacity: 1; transform: perspective(1200px) rotateY(0deg); }
 }

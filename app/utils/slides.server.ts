@@ -4,9 +4,12 @@
 import {
     getSlideMetadata,
     getAllSlideIds,
-    getFirstSlideId
+    getFirstSlideId,
+    discoverSlides
 } from './slide-discovery';
+import type { SlideTransition } from './slide-discovery';
 
+export type { SlideTransition };
 export { getAllSlideIds, getFirstSlideId };
 
 export interface SlideNavigation {
@@ -16,13 +19,22 @@ export interface SlideNavigation {
     nextSlide: string | null;
     prevSlide: string | null;
     title: string;
+    transition: SlideTransition;
+    /** Map of slideId -> transition for all slides, so the client can look up the target slide's transition before navigating */
+    transitionMap: Record<string, SlideTransition>;
 }
 
 // Server-side slide resolution - runs at request time
 export async function getSlideNavigation(
     slideId: string
 ): Promise<SlideNavigation> {
-    const allSlideIds = await getAllSlideIds();
+    const allSlides = await discoverSlides();
+    const allSlideIds = allSlides.map((s) => s.id);
+    const transitionMap: Record<string, SlideTransition> = {};
+    for (const slide of allSlides) {
+        transitionMap[slide.id] = slide.transition;
+    }
+
     const currentIndex = allSlideIds.indexOf(slideId);
 
     if (currentIndex === -1) {
@@ -35,7 +47,9 @@ export async function getSlideNavigation(
             totalSlides: allSlideIds.length,
             nextSlide: allSlideIds[1] || null,
             prevSlide: null,
-            title: firstSlideMetadata?.title || 'Untitled Slide'
+            title: firstSlideMetadata?.title || 'Untitled Slide',
+            transition: firstSlideMetadata?.transition || 'depth',
+            transitionMap
         };
     }
 
@@ -47,7 +61,9 @@ export async function getSlideNavigation(
         totalSlides: allSlideIds.length,
         nextSlide: allSlideIds[currentIndex + 1] || null,
         prevSlide: allSlideIds[currentIndex - 1] || null,
-        title: slideMetadata?.title || 'Untitled Slide'
+        title: slideMetadata?.title || 'Untitled Slide',
+        transition: slideMetadata?.transition || 'depth',
+        transitionMap
     };
 }
 

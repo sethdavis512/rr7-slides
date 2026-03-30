@@ -1,10 +1,19 @@
 // Dynamic slide discovery using Vite's glob functionality
 // Uses import.meta.glob for lazy loading with frontmatter-based ordering
 
+export type SlideTransition =
+    | 'depth'
+    | 'fade'
+    | 'lift'
+    | 'zoom'
+    | 'flip'
+    | 'none';
+
 export interface SlideMetadata {
     id: string;
     title: string;
     order: number;
+    transition: SlideTransition;
     filename: string;
     component: () => Promise<React.ComponentType>;
 }
@@ -23,27 +32,44 @@ function extractSlideId(filePath: string): string {
     return filename.replace('.mdx', '');
 }
 
+const VALID_TRANSITIONS: SlideTransition[] = [
+    'depth',
+    'fade',
+    'lift',
+    'zoom',
+    'flip',
+    'none'
+];
+
 interface MDXModule {
     default: React.ComponentType;
-    frontmatter?: { title?: string; order?: number };
+    frontmatter?: { title?: string; order?: number; transition?: string };
 }
 
 // Parse frontmatter from MDX module
 async function parseSlideFrontmatter(
     moduleLoader: () => Promise<MDXModule>
-): Promise<{ title: string; order: number }> {
+): Promise<{ title: string; order: number; transition: SlideTransition }> {
     try {
         const module = await moduleLoader();
         const frontmatter = module.frontmatter ?? {};
+        const rawTransition = frontmatter.transition ?? 'depth';
+        const transition = VALID_TRANSITIONS.includes(
+            rawTransition as SlideTransition
+        )
+            ? (rawTransition as SlideTransition)
+            : 'depth';
         return {
             title: frontmatter.title || 'Untitled Slide',
-            order: frontmatter.order || 0
+            order: frontmatter.order || 0,
+            transition
         };
     } catch (error) {
         console.warn('Failed to parse slide frontmatter:', error);
         return {
             title: 'Untitled Slide',
-            order: 0
+            order: 0,
+            transition: 'depth'
         };
     }
 }
@@ -59,12 +85,14 @@ export async function discoverSlides(): Promise<SlideMetadata[]> {
     for (const [filePath, moduleLoader] of Object.entries(slideModules)) {
         const slideId = extractSlideId(filePath);
         const loader = moduleLoader as () => Promise<MDXModule>;
-        const { title, order } = await parseSlideFrontmatter(loader);
+        const { title, order, transition } =
+            await parseSlideFrontmatter(loader);
 
         slides.push({
             id: slideId,
             title,
             order,
+            transition,
             filename: filePath.split('/').pop() || '',
             component: async () => {
                 const module = await loader();

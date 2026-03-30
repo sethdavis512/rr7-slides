@@ -1,65 +1,36 @@
 ---
 title: Section Title
 order: 3
+transition: lift
 ---
 
-<div className="h-full flex flex-col justify-center px-24 py-16">
-  {/* Section Header */}
-  <div className="text-center mb-16">
-    <div className="inline-block px-8 py-3 bg-blue-500 bg-opacity-20 rounded-full border border-blue-500 border-opacity-50 mb-8">
-      <p className="text-lg text-blue-300 font-medium uppercase tracking-wider">Section 2</p>
-    </div>
-    <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
-      Section Title
-    </h1>
-    <div className="h-1 w-24 bg-blue-500 mx-auto mb-8"></div>
-    <p className="text-2xl text-gray-300 font-light max-w-3xl mx-auto">
-      Brief description of what this section will cover and why it matters to your audience.
-    </p>
-  </div>
+<div className="h-full flex flex-col justify-center">
+  <p className="text-accent text-sm font-medium uppercase tracking-[0.2em] mb-6">Section 2</p>
+  <h1 className="font-display text-[clamp(3rem,5vw+0.5rem,5.5rem)] text-ink leading-[1] mb-6">
+    Section Title
+  </h1>
+  <p className="text-[clamp(1.125rem,1.5vw,1.5rem)] text-ink-secondary font-light max-w-[50ch] mb-16 leading-relaxed">
+    Brief description of what this section will cover and why it matters to your audience.
+  </p>
 
-  {/* Main Content - Two Columns */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-    {/* Left Column */}
-    <div className="space-y-6">
-      <h3 className="text-2xl font-semibold text-white mb-4">Key Points</h3>
-      <div className="space-y-4 text-lg text-gray-100">
-        <div className="flex items-start">
-          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-4 mt-0.5 flex-shrink-0">
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-          <p>First important concept or finding that supports your main message</p>
-        </div>
-        <div className="flex items-start">
-          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-4 mt-0.5 flex-shrink-0">
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-          <p>Second key insight that builds upon the previous point</p>
-        </div>
-        <div className="flex items-start">
-          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-4 mt-0.5 flex-shrink-0">
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-          <p>Third crucial element that ties everything together</p>
-        </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+    <div>
+      <h3 className="text-lg font-medium text-ink mb-5">Key Points</h3>
+      <div className="space-y-4 text-ink-secondary leading-relaxed">
+        <p>First important concept or finding that supports your main message</p>
+        <p>Second key insight that builds upon the previous point</p>
+        <p>Third crucial element that ties everything together</p>
       </div>
     </div>
 
-    {/* Right Column */}
-    <div className="space-y-6">
-      <h3 className="text-2xl font-semibold text-white mb-4">Supporting Details</h3>
-      <div className="bg-gray-800 bg-opacity-50 rounded-2xl p-6 border border-gray-700">
-        <div className="space-y-4 text-gray-200">
-          <p className="text-base leading-relaxed">
-            Additional context, statistics, or examples that reinforce your main points and help the audience understand the significance.
-          </p>
-          <div className="border-l-4 border-blue-500 pl-4">
-            <p className="text-sm italic text-gray-300">
-              "Include a relevant quote, statistic, or key insight here that emphasizes your message."
-            </p>
-          </div>
-        </div>
-      </div>
+    <div>
+      <h3 className="text-lg font-medium text-ink mb-5">Supporting Details</h3>
+      <p className="text-ink-secondary leading-relaxed mb-6">
+        Additional context, statistics, or examples that reinforce your main points and help the audience understand the significance.
+      </p>
+      <p className="border-l-2 border-accent pl-4 text-ink-tertiary italic text-sm leading-relaxed">
+        "Include a relevant quote, statistic, or key insight here that emphasizes your message."
+      </p>
     </div>
   </div>
 </div>
