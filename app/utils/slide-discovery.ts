@@ -1,5 +1,6 @@
-// Dynamic slide discovery using Vite's glob functionality
-// Uses import.meta.glob for lazy loading with frontmatter-based ordering
+// Dynamic slide discovery using Vite's glob functionality.
+// Slides are eagerly imported so they render synchronously during view
+// transitions (avoids a flash of "Loading..." between slides).
 
 export type SlideTransition =
     | 'depth'
@@ -15,22 +16,20 @@ export interface SlideMetadata {
     order: number;
     transition: SlideTransition;
     filename: string;
-    component: () => Promise<React.ComponentType>;
+    Component: React.ComponentType;
 }
 
-// Use Vite's glob to discover all MDX slides
-const slideModules = import.meta.glob('../routes/slides/*.mdx', {
-    eager: false
+interface MDXModule {
+    default: React.ComponentType;
+    frontmatter?: { title?: string; order?: number; transition?: string };
+}
+
+// Eagerly import all MDX slides. They're small and need to be parsed at
+// startup anyway to read frontmatter — eager loading keeps navigation
+// instantaneous and avoids a render cycle showing a loading placeholder.
+const slideModules = import.meta.glob<MDXModule>('../routes/slides/*.mdx', {
+    eager: true
 });
-
-// Cache for parsed slide metadata
-let cachedSlides: SlideMetadata[] | null = null;
-
-// Extract slide ID from filename (e.g., 'intro.mdx' -> 'intro')
-function extractSlideId(filePath: string): string {
-    const filename = filePath.split('/').pop() || '';
-    return filename.replace('.mdx', '');
-}
 
 const VALID_TRANSITIONS: SlideTransition[] = [
     'depth',
@@ -41,17 +40,15 @@ const VALID_TRANSITIONS: SlideTransition[] = [
     'none'
 ];
 
-interface MDXModule {
-    default: React.ComponentType;
-    frontmatter?: { title?: string; order?: number; transition?: string };
+function extractSlideId(filePath: string): string {
+    const filename = filePath.split('/').pop() || '';
+    return filename.replace('.mdx', '');
 }
 
-// Parse frontmatter from MDX module
-async function parseSlideFrontmatter(
-    moduleLoader: () => Promise<MDXModule>
-): Promise<{ title: string; order: number; transition: SlideTransition }> {
-    try {
-        const module = await moduleLoader();
+function buildSlides(): SlideMetadata[] {
+    const slides: SlideMetadata[] = [];
+
+    for (const [filePath, module] of Object.entries(slideModules)) {
         const frontmatter = module.frontmatter ?? {};
         const rawTransition = frontmatter.transition ?? 'depth';
         const transition = VALID_TRANSITIONS.includes(
@@ -59,87 +56,42 @@ async function parseSlideFrontmatter(
         )
             ? (rawTransition as SlideTransition)
             : 'depth';
-        return {
-            title: frontmatter.title || 'Untitled Slide',
-            order: frontmatter.order || 0,
-            transition
-        };
-    } catch (error) {
-        console.warn('Failed to parse slide frontmatter:', error);
-        return {
-            title: 'Untitled Slide',
-            order: 0,
-            transition: 'depth'
-        };
-    }
-}
-
-// Discover and parse all slides with frontmatter
-export async function discoverSlides(): Promise<SlideMetadata[]> {
-    if (cachedSlides) {
-        return cachedSlides;
-    }
-
-    const slides: SlideMetadata[] = [];
-
-    for (const [filePath, moduleLoader] of Object.entries(slideModules)) {
-        const slideId = extractSlideId(filePath);
-        const loader = moduleLoader as () => Promise<MDXModule>;
-        const { title, order, transition } =
-            await parseSlideFrontmatter(loader);
 
         slides.push({
-            id: slideId,
-            title,
-            order,
+            id: extractSlideId(filePath),
+            title: frontmatter.title || 'Untitled Slide',
+            order: frontmatter.order ?? 0,
             transition,
             filename: filePath.split('/').pop() || '',
-            component: async () => {
-                const module = await loader();
-                return module.default;
-            }
+            Component: module.default
         });
     }
 
-    // Sort by frontmatter order field
     slides.sort((a, b) => a.order - b.order);
-
-    // Cache the results
-    cachedSlides = slides;
     return slides;
 }
 
-// Get slide metadata by ID
-export async function getSlideMetadata(
-    slideId: string
-): Promise<SlideMetadata | null> {
-    const slides = await discoverSlides();
-    return slides.find((slide) => slide.id === slideId) || null;
+const slides = buildSlides();
+const slidesById = new Map(slides.map((s) => [s.id, s]));
+
+export function discoverSlides(): SlideMetadata[] {
+    return slides;
 }
 
-// Get all slide IDs in order
-export async function getAllSlideIds(): Promise<string[]> {
-    const slides = await discoverSlides();
+export function getSlideMetadata(slideId: string): SlideMetadata | null {
+    return slidesById.get(slideId) ?? null;
+}
+
+export function getAllSlideIds(): string[] {
     return slides.map((slide) => slide.id);
 }
 
-// Get slide component by ID
-export async function getSlideComponent(
+export function getSlideComponent(
     slideId: string
-): Promise<React.ComponentType | null> {
-    const metadata = await getSlideMetadata(slideId);
-    if (!metadata) return null;
-
-    try {
-        return await metadata.component();
-    } catch (error) {
-        console.error(`Failed to load slide component for ${slideId}:`, error);
-        return null;
-    }
+): React.ComponentType | null {
+    return slidesById.get(slideId)?.Component ?? null;
 }
 
-// Get first slide ID
-export async function getFirstSlideId(): Promise<string> {
-    const slides = await discoverSlides();
+export function getFirstSlideId(): string {
     return slides[0]?.id || '';
 }

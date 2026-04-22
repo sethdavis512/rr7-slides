@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
     getSlideNavigation,
     slideExists,
@@ -21,7 +21,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     const themeId = isValidTheme(params.themeId)
         ? params.themeId
         : 'ink';
-    const slideId = params.slideId || (await getFirstSlideId());
+    const slideId = params.slideId || getFirstSlideId();
 
     if (!isValidTheme(params.themeId)) {
         throw new Response('', {
@@ -30,16 +30,16 @@ export async function loader({ params }: Route.LoaderArgs) {
         });
     }
 
-    if (!(await slideExists(slideId))) {
-        const firstSlideId = await getFirstSlideId();
+    if (!slideExists(slideId)) {
+        const firstSlideId = getFirstSlideId();
         throw new Response('', {
             status: 302,
             headers: { Location: `/${themeId}/slides/${firstSlideId}` }
         });
     }
 
-    const navigation = await getSlideNavigation(slideId);
-    const allSlideIds = await getAllSlideIds();
+    const navigation = getSlideNavigation(slideId);
+    const allSlideIds = getAllSlideIds();
 
     return {
         ...navigation,
@@ -49,59 +49,17 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 function SlideComponentWrapper({ slideId }: { slideId: string }) {
-    const [SlideComponent, setSlideComponent] =
-        useState<React.ComponentType | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const SlideComponent = getSlideComponent(slideId);
 
-    useEffect(() => {
-        let isMounted = true;
-
-        async function loadSlide() {
-            try {
-                const component = await getSlideComponent(slideId);
-                if (isMounted) {
-                    if (component) {
-                        setSlideComponent(() => component);
-                        setError(null);
-                    } else {
-                        setError('Slide not found');
-                    }
-                }
-            } catch (err) {
-                if (isMounted) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : 'Failed to load slide'
-                    );
-                }
-            }
-        }
-
-        loadSlide();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [slideId]);
-
-    if (error) {
+    if (!SlideComponent) {
         return (
             <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-display text-ink mb-4">
                         Error Loading Slide
                     </h1>
-                    <p className="text-ink-secondary">{error}</p>
+                    <p className="text-ink-secondary">Slide not found</p>
                 </div>
-            </div>
-        );
-    }
-
-    if (!SlideComponent) {
-        return (
-            <div className="h-full flex items-center justify-center">
-                <p className="text-ink-tertiary animate-pulse">Loading...</p>
             </div>
         );
     }

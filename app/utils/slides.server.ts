@@ -25,10 +25,8 @@ export interface SlideNavigation {
 }
 
 // Server-side slide resolution - runs at request time
-export async function getSlideNavigation(
-    slideId: string
-): Promise<SlideNavigation> {
-    const allSlides = await discoverSlides();
+export function getSlideNavigation(slideId: string): SlideNavigation {
+    const allSlides = discoverSlides();
     const allSlideIds = allSlides.map((s) => s.id);
     const transitionMap: Record<string, SlideTransition> = {};
     for (const slide of allSlides) {
@@ -38,8 +36,8 @@ export async function getSlideNavigation(
     const currentIndex = allSlideIds.indexOf(slideId);
 
     if (currentIndex === -1) {
-        const firstSlideId = await getFirstSlideId();
-        const firstSlideMetadata = await getSlideMetadata(firstSlideId);
+        const firstSlideId = getFirstSlideId();
+        const firstSlideMetadata = getSlideMetadata(firstSlideId);
 
         return {
             slideId: firstSlideId,
@@ -53,7 +51,7 @@ export async function getSlideNavigation(
         };
     }
 
-    const slideMetadata = await getSlideMetadata(slideId);
+    const slideMetadata = getSlideMetadata(slideId);
 
     return {
         slideId,
@@ -68,7 +66,6 @@ export async function getSlideNavigation(
 }
 
 // Check if a slide exists
-export async function slideExists(slideId: string): Promise<boolean> {
-    const metadata = await getSlideMetadata(slideId);
-    return metadata !== null;
+export function slideExists(slideId: string): boolean {
+    return getSlideMetadata(slideId) !== null;
 }
