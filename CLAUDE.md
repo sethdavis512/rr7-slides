@@ -5,10 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ```bash
-npm run dev        # Development server with hot reload
-npm run build      # Production build
-npm start          # Start production server
-npm run typecheck  # Type checking (includes React Router type generation)
+bun run dev        # Development server with hot reload
+bun run build      # Production build
+bun start          # Start production server
+bun run typecheck  # Type checking (includes React Router type generation)
 ```
 
 ## Architecture Overview

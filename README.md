@@ -6,8 +6,7 @@ A slideshow application built with React Router 7, TypeScript, and MDX. Features
 
 ### Prerequisites
 
-- Node.js 22+
-- npm
+- [Bun](https://bun.com) 1.0+
 
 ### Installation
 
@@ -21,13 +20,13 @@ cd rr7-slides
 1. Install dependencies:
 
 ```bash
-npm install
+bun install
 ```
 
 1. Start the development server:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 1. Open your browser to `http://localhost:5173`
@@ -120,10 +119,10 @@ The application uses Vite's `import.meta.glob` to automatically discover slides:
 ### Available Scripts
 
 ```bash
-npm run dev        # Start development server
-npm run build      # Build for production
-npm start          # Start production server
-npm run typecheck  # Type checking (includes React Router type generation)
+bun run dev        # Start development server
+bun run build      # Build for production
+bun start          # Start production server
+bun run typecheck  # Type checking (includes React Router type generation)
 ```
 
 ## Deployment
@@ -137,11 +136,11 @@ docker build -t rr7-slides .
 docker run -p 3000:3000 rr7-slides
 ```
 
-### Node.js
+### Bun
 
 ```bash
-npm run build
-npm start
+bun run build
+bun start
 ```
 
 ## License
